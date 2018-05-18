@@ -1,0 +1,144 @@
+import cv2
+import numpy as np
+
+vid = cv2.VideoCapture(1)
+
+while True:
+    _,frame = vid.read()            #reading the live feed image-by-image
+    hsv1 = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)        #changing BGR to HSV(Hue saturation and value)
+    hsv2 = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
+    hsv3 = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
+    hsv4 = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
+
+    blur1 = cv2.GaussianBlur(hsv1,(25,25),0)    #bluring the frame which is converted to HSV
+    blur2 = cv2.GaussianBlur(hsv2,(25,25),0)
+    blur3 = cv2.GaussianBlur(hsv3,(25,25),0)
+    blur4 = cv2.GaussianBlur(hsv4,(25,25),0)
+
+    lower_blue = np.array([100,120,100])    #creating a range of HSV colours
+    higher_blue = np.array([130,255,300])
+
+    lower_green = np.array([60,110,100])
+    higher_green = np.array([90,255,300])
+
+    lower_yellow = np.array([5,115,100])
+    higher_yellow = np.array([75,255,300])
+
+    lower_red = np.array([130,125,100])
+    higher_red = np.array([200,255,300])
+
+    mask1 = cv2.inRange(blur1,lower_blue,higher_blue)   #Segregating colours within the HSV-range
+    mask2 = cv2.inRange(blur2,lower_green,higher_green)
+    mask3 = cv2.inRange(blur3,lower_yellow,higher_yellow)
+    mask4 = cv2.inRange(blur4,lower_red,higher_red)
+
+    blr1 = cv2.GaussianBlur(mask1,(15,15),0)    #bluring the segregated image
+    cv2.imshow('blr1',blr1)
+    blr2 = cv2.GaussianBlur(mask2,(15,15),0)
+    cv2.imshow('blr2',blr2)
+    blr3 = cv2.GaussianBlur(mask3,(15,15),0)
+    cv2.imshow('blr3',blr3)
+    blr4 = cv2.GaussianBlur(mask4,(15,15),0)
+    cv2.imshow('blr4',blr4)
+
+    circles1 = []   #creating arrays
+    circles2 = []
+    circles3 = []
+    circles4 = []
+
+    circles1 = cv2.HoughCircles(blr1, cv2.HOUGH_GRADIENT,1,20,param1=20,param2=5,minRadius=0,maxRadius=0)   #finding the circle in the Gaussian-blurred image
+    circles2 = cv2.HoughCircles(blr2, cv2.HOUGH_GRADIENT,1,20,param1=20,param2=5,minRadius=0,maxRadius=0)
+    circles3 = cv2.HoughCircles(blr3, cv2.HOUGH_GRADIENT,1,20,param1=20,param2=5,minRadius=0,maxRadius=0)
+    circles4 = cv2.HoughCircles(blr4, cv2.HOUGH_GRADIENT,1,20,param1=20,param2=5,minRadius=0,maxRadius=0)
+
+
+    print(circles1,"BLUE")      #printing the center values
+    print(circles2,"GREEN")
+    print(circles3,"YELLOW")
+    print(circles4,"RED")
+
+    cv2.imshow('mask1',mask1)   #printing the image
+    cv2.imshow('mask2',mask2) 
+    cv2.imshow('mask3',mask3)
+    cv2.imshow('mask4',mask4)
+    cv2.imshow('frame',frame)
+    
+
+    k = cv2.waitKey(5) & 0xFF   #Waiting for the 'Esc' button to be pressed
+    if k == 27:
+        break
+
+cv2.destroyAllWindows()    #close all the windows
+vid.release()
+
+    
+
+    ###### Another method to find the center(NOT ACCURATE and does NOT DETECT the circle) ####### 
+
+
+    
+    #contours1 = cv2.findContours(blr1, cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    #contours2 = cv2.findContours(blr2, cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    #contours3 = cv2.findContours(blr3, cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    #contours4 = cv2.findContours(blr4, cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+
+    #cnt_1 = contours1[0]
+    #cnt_2 = contours2[0]
+    #cnt_3 = contours3[0]
+    #cnt_4 = contours4[0]
+
+    #(x1,y1),radius1 = cv2.minEnclosingCircle(cnt_1)
+    #center1 = (int(x1),int(y1))
+    #radius1 = int(radius1)
+    #cv2.circle(mask1,center1,radius1,(255,0,0),2)
+
+    #np.circles1 = []
+    ##np.circles2 = []
+    ##np.circles3 = []
+
+    #x1,y1,w1,h1 = cv2.boundingRect(cnt_1)
+    ##X1 = (x1+w1)/2
+    #Y1 = (y1+h1)/2
+    
+    #x2,y2,w2,h2 = cv2.boundingRect(cnt_2)
+    #X2 = (x2+w2)/2
+    #Y2 = (y2+h2)/2
+    
+    #x3,y3,w3,h3 = cv2.boundingRect(cnt_3)
+    #X3 = (x3+w3)/2
+    #Y4 = (y3+h3)/2
+    
+    ##x4,y4,w4,h4 = cv2.boundingRect(cnt_4)
+    #X4 = (x4+w4)/2
+    #Y4 = (y4+h4)/2
+
+    #or
+    #cv2.circle(mask1,center1,radius2,(0,255,0),2)
+    #cv2.putText(mask1,"center_x1,center_y1", (circles1[0],circles[1]), cv2.CV_FONT_HERSHEY_SIMPLEX, 2, 255)
+    
+    #(x2,y2),radius2 = cv2.minEnclosingCircle(cnt_2)
+    #center2 = (int(x2),int(y2))
+    #radius2 = int(radius2)
+    #cv2.circle(mask2,center2,radius2,(0,255,0),2)
+
+    #(x3,y3),radius3 = cv2.minEnclosingCircle(cnt_3)
+    #center3 = (int(x3),int(y3))
+    #radius3 = int(radius3)
+    #cv2.circle(mask3,center3,radius3,(0,0,255),2)
+
+    #(x4,y4),radius4 = cv2.minEnclosingCircle(cnt_4)
+    #center4 = (int(x4),int(y4))
+    #radius4 = int(radius4)
+    #cv2.circle(mask4,center4,radius4,(255,0,255),2)
+
+    
+    #print(X1,X2,X3,X3)
+    #print(x1,y1,w1,h1)
+
+
+
+    ########################################################
+
+   
+        
+    
